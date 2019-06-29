@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='steimatzky',
-      version='1.0.1',
+      version='1.0.2',
       description='steimatzky.co.il Web Scraping library',
       long_description='A Python library that allows developers to scrape data from steimatzky.co.il',
       author='sl4v',

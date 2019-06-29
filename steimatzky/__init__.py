@@ -60,7 +60,7 @@ class Author:
 class SteimatzkyScraper:
 
     def __init__(self):
-        self.requests_session = requests.Session()
+        pass
 
     def search_for_items(self, q):
         return SteimatzkyScraper.__add_items('https://www.steimatzky.co.il/catalogsearch/result/', params={'q': q})
