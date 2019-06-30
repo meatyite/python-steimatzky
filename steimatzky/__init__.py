@@ -63,7 +63,7 @@ class Author:
         self.url = url
 
     def get_books(self):
-        SteimatzkyScraper.__add_items(self.url)
+        return SteimatzkyScraper.__add_items(self.url)
 
 
 class SteimatzkyScraper:
@@ -114,6 +114,10 @@ class SteimatzkyScraper:
             url=book_url,
             image=product_hover.find('a', {'class': 'product-image'}).find('span').find('img').get('src')
         )
+
+    @staticmethod
+    def _Author__add_items(url, params={}):
+        return SteimatzkyScraper.__add_items(url, params)
 
     @staticmethod
     def _Item__get_info_for_item(url):
