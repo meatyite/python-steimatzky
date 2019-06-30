@@ -43,14 +43,23 @@ class Item:
         self.author = author
         self.url = url
         self.image = image
-        #self.price = price
-        #self.price_for_loyalty_customers = price_for_loyalty_customers
+
+    def get_more_info(self):
+        return SteimatzkyScraper.__get_info_for_item(self.url)
+
+
+class ItemExtended:
+
+    def __init__(self, description, regular_price, price_at_website):
+        self.description = re.sub(' +', ' ', description)
+        self.regular_price = regular_price
+        self.price_at_website = price_at_website
 
 
 class Author:
 
     def __init__(self, name, url):
-        self.name = re.sub(r'[\s+]', '', name)
+        self.name = re.sub(' +', ' ', name)
         self.url = url
 
     def get_books(self):
@@ -63,7 +72,7 @@ class SteimatzkyScraper:
         pass
 
     def search_for_items(self, q):
-        return SteimatzkyScraper.__add_items('https://www.steimatzky.co.il/catalogsearch/result/', params={'q': q})
+        return SteimatzkyScraper.__add_items('https://www.steimatzky.co.il/catalogsearch/result/', params={'q': q, 'limit': 120})
 
     def get_bestsellers_by_genre(self, best_seller_book_type=BestSellerBookType.fiction):
         return SteimatzkyScraper.__add_items(best_seller_book_type.value)
@@ -99,14 +108,33 @@ class SteimatzkyScraper:
             url=book_author_span.find('a').get('href')
         )
 
-        #price_box = product_hover.find('div', {'class': 'price-box'})
-        #price_box_loyalty = product_hover.find('div', {'class': 'price-box  sale'})
-
         return Item(
             title=book_title,
             author=book_author,
             url=book_url,
             image=product_hover.find('a', {'class': 'product-image'}).find('span').find('img').get('src')
-            #price=self.__get_price(price_box),
-            #price_for_loyalty_customers=self.__get_price(price_box_loyalty)
+        )
+
+    @staticmethod
+    def _Item__get_info_for_item(url):
+        item_html = requests.get(url).content.decode()
+        soup = bs(item_html, 'html.parser')
+
+        regular_price = soup.find('div', {'class': 'normalPrice'}).find('span', {'class': 'price'}).string.replace('\xa0₪', '')
+        regular_price = float(regular_price)
+        price_for_website_tag = soup.find('div', {'class': 'salePrice'}).find('span', {'class': 'price'})
+        price_for_website = float(
+            price_for_website_tag.find('span', {'class': 'big'}).string
+            + price_for_website_tag.find('span', {'class': ''}).string
+        )
+
+        product_description = ''
+        product_description_tag = soup.find('div', {'class': 'productDescription'})
+        if not(product_description_tag is None):
+            product_description = product_description_tag.get_text()
+
+        return ItemExtended(
+            regular_price=regular_price,
+            price_at_website=price_for_website,
+            description=product_description
         )
